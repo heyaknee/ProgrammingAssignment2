@@ -1,0 +1,57 @@
+# Function to create a special matrix object with caching
+makeCacheMatrix <- function() {
+    mat <- NULL
+    inv <- NULL
+    
+    # Function to set the matrix
+    set <- function(matrix) {
+        mat <<- matrix
+        inv <<- NULL
+    }
+    
+    # Function to get the matrix
+    get <- function() mat
+    
+    # Function to set the cached inverse
+    setInverse <- function(inverse) {
+        inv <<- inverse
+    }
+    
+    # Function to get the cached inverse
+    getInverse <- function() inv
+    
+    # Return a list of functions
+    list(set = set,
+         get = get,
+         setInverse = setInverse,
+         getInverse = getInverse)
+}
+
+# Function to compute the inverse of the cached matrix
+cacheSolve <- function(cacheMatrix, ...) {
+    # Retrieve cached inverse
+    cachedInv <- cacheMatrix$getInverse()
+    
+    # If the inverse is already calculated, return it
+    if (!is.null(cachedInv)) {
+        message("Getting cached inverse.")
+        return(cachedInv)
+    }
+    
+    # If not, calculate the inverse using solve
+    matrix <- cacheMatrix$get()
+    
+    # Check for singularity
+    if (any(is.infinite(matrix)) || any(is.na(matrix)) || any(is.nan(matrix))) {
+        stop("Matrix is singular. Inverse does not exist.")
+    }
+    
+    inverse <- solve(matrix, ...)
+    
+    # Cache the inverse
+    cacheMatrix$setInverse(inverse)
+    
+    # Return the calculated inverse
+    inverse
+}
+
